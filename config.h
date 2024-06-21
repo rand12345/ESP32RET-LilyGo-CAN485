@@ -65,15 +65,15 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 //It's not even used on this hardware currently. But, slows down the blinks to make them more visible
 #define BLINK_SLOWNESS  100 
 
-#define A0_LED_PIN     2
+#define A0_LED_PIN     4
 #define A0_NUM_LEDS    1
-#define A5_LED_PIN     15
-#define A5_NUM_LEDS    4
+#define A5_LED_PIN     4
+#define A5_NUM_LEDS    1
 #define BRIGHTNESS  190
 #define LED_TYPE    WS2812B
 #define COLOR_ORDER GRB
 
-#define SW_EN     2
+#define SW_EN     23
 #define SW_MODE0  26
 #define SW_MODE1  27
 

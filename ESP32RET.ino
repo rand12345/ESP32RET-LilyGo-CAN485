@@ -32,7 +32,7 @@ SOFTWARE OR THE USE OR OTHER DEALINGS IN THE SOFTWARE.
 #include <FastLED.h>
 #include "ELM327_Emulator.h"
 #include "SerialConsole.h"
-#include "wifi_manager.h"
+// #include "wifi_manager.h"
 #include "gvret_comm.h"
 #include "can_manager.h"
 #include "lawicel.h"
@@ -55,7 +55,7 @@ uint8_t espChipRevision;
 
 ELM327Emu elmEmulator;
 
-WiFiManager wifiManager;
+// WiFiManager wifiManager;
 
 GVRET_Comm_Handler serialGVRET; //gvret protocol over the serial to USB connection
 GVRET_Comm_Handler wifiGVRET; //GVRET over the wifi telnet port
@@ -87,9 +87,10 @@ void loadSettings()
     settings.enableLawicel = nvPrefs.getBool("enableLawicel", true);
     settings.systemType = nvPrefs.getUChar("systype", (espChipRevision > 2) ? 0 : 1); //0 = A0, 1 = EVTV ESP32
 
-    if (settings.systemType == 0)
+    // if (settings.systemType == 0)
+    if (true)
     {
-        Logger::console("Running on Macchina A0");
+        Logger::console("Running on CAN485");
         canBuses[0] = &CAN0;
         SysSettings.LED_CANTX = 255;
         SysSettings.LED_CANRX = 255;
@@ -116,11 +117,11 @@ void loadSettings()
         FastLED.setBrightness(  BRIGHTNESS );
         leds[0] = CRGB::Red;
         FastLED.show();
-        pinMode(21, OUTPUT);
-        digitalWrite(21, LOW);
-        CAN0.setCANPins(GPIO_NUM_4, GPIO_NUM_5);
+        pinMode(23, OUTPUT);
+        digitalWrite(23, LOW); // can silence
+        CAN0.setCANPins(GPIO_NUM_26, GPIO_NUM_27);
     }
-
+  /*
     if (settings.systemType == 1)
     {
         Logger::console("Running on EVTV ESP32 Board");
@@ -198,7 +199,7 @@ void loadSettings()
         digitalWrite(SW_MODE0, HIGH);
         digitalWrite(SW_MODE1, HIGH);
     }
-
+    */
     if (nvPrefs.getString("SSID", settings.SSID, 32) == 0)
     {
         strcpy(settings.SSID, deviceName);
@@ -264,7 +265,7 @@ void setup()
             FastLED.show();
         }
     }
-    /*else*/ wifiManager.setup();
+    // /*else*/ wifiManager.setup();
 
     //heap_caps_print_heap_info(MALLOC_CAP_8BIT);
 
@@ -328,14 +329,16 @@ void loop()
     //}
 
     canManager.loop();
-    /*if (!settings.enableBT)*/ wifiManager.loop();
+    // /*if (!settings.enableBT)*/ wifiManager.loop();
 
-    size_t wifiLength = wifiGVRET.numAvailableBytes();
+    // size_t wifiLength = wifiGVRET.numAvailableBytes();
+    size_t wifiLength = 0;
     size_t serialLength = serialGVRET.numAvailableBytes();
     size_t maxLength = (wifiLength>serialLength) ? wifiLength : serialLength;
 
     //If the max time has passed or the buffer is almost filled then send buffered data out
-    if ((micros() - lastFlushMicros > SER_BUFF_FLUSH_INTERVAL) || (maxLength > (WIFI_BUFF_SIZE - 40)) ) 
+    // if ((micros() - lastFlushMicros > SER_BUFF_FLUSH_INTERVAL) || (maxLength > (WIFI_BUFF_SIZE - 40)) ) 
+    if ((micros() - lastFlushMicros > SER_BUFF_FLUSH_INTERVAL) ) 
     {
         lastFlushMicros = micros();
         if (serialLength > 0) 
@@ -343,10 +346,10 @@ void loop()
             Serial.write(serialGVRET.getBufferedBytes(), serialLength);
             serialGVRET.clearBufferedBytes();
         }
-        if (wifiLength > 0)
-        {
-            wifiManager.sendBufferedData();
-        }
+        // if (wifiLength > 0)
+        // {
+        //     // wifiManager.sendBufferedData();
+        // }
     }
 
     serialCnt = 0;
